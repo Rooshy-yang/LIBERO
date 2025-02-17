@@ -7,6 +7,8 @@ from robosuite.utils.errors import RandomizationError
 
 import libero.libero.envs.bddl_utils as BDDLUtils
 from libero.libero.envs import *
+import dm_env
+from dm_env.specs import Array, BoundedArray
 
 
 class ControlEnv:
@@ -276,3 +278,61 @@ class DemoRenderEnv(ControlEnv):
 
     def _get_observations(self):
         return self.env._get_observations()
+
+class OffScreenRenderEnvToDmEnvWrapper(dm_env.Environment):
+    """
+    Wrapper to convert OffScreenRenderEnv to dm_env.Environment for data collection.
+    """
+    def __init__(self, **kwargs):
+        env = OffScreenRenderEnv(**kwargs)
+        self.env = env
+
+    def observation_spec(self):
+        # BUG: dtype is not consistent with the Libero env by env.reset()
+        observation_spec = self.env.env.observation_spec()  # OrderedDict
+        observation_spec = {
+            name: Array(
+                shape=observation_spec[name].shape,
+                dtype=observation_spec[name].dtype,
+                name=name,
+            )
+            for name in observation_spec.keys()
+        }
+        return observation_spec
+
+    def action_spec(self):
+        action_minimum, action_maximum = self.env.env.action_spec
+        return BoundedArray(
+            shape=action_minimum.shape,
+            dtype=action_minimum.dtype,
+            minimum=action_minimum,
+            maximum=action_maximum,
+            name="action",
+        )
+
+    def reward_spec(self):
+        return Array(shape=(), dtype=np.float32, name="reward")
+
+    def reset(self) -> dm_env.TimeStep:
+        """Resets the environment and returns the initial observation."""
+        observation = self.env.reset()
+        observation = {k: v.astype(np.float32) if 'image' not in k else v for k, v in observation.items()}
+        return dm_env.restart(observation)
+
+    def step(self, action) -> dm_env.TimeStep:
+        """Takes a step in the environment."""
+        obs, reward, done, info = self.env.step(action)
+        # keep obs dtype as float32
+        obs = {k: v.astype(np.float32) if 'image' not in k else v for k, v in obs.items()}
+        reward = np.float32(reward)
+        if done:
+            return dm_env.termination(reward, obs)
+        else:
+            return dm_env.transition(reward, obs)
+
+    def close(self):
+        """Closes the environment."""
+        self.env.close()
+
+    def set_init_state(self, init_state):
+        return self.env.set_init_state(init_state)
