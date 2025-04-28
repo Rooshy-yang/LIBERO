@@ -304,7 +304,7 @@ class OffScreenRenderEnvToDmEnvWrapper(dm_env.Environment):
         action_minimum, action_maximum = self.env.env.action_spec
         return BoundedArray(
             shape=action_minimum.shape,
-            dtype=action_minimum.dtype,
+            dtype=np.float32,
             minimum=action_minimum,
             maximum=action_maximum,
             name="action",
