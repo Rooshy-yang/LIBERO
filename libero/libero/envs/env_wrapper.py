@@ -332,7 +332,10 @@ class OffScreenRenderEnvToDmEnvWrapper(dm_env.Environment):
 
     def close(self):
         """Closes the environment."""
-        self.env.close()
+        return self.env.close()
 
     def set_init_state(self, init_state):
         return self.env.set_init_state(init_state)
+
+    def seed(self, seed):
+        return self.env.seed(seed)
