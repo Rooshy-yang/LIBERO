@@ -209,7 +209,7 @@ class ResnetEncoder(nn.Module):
                     "[error] cannot freeze pretrained "
                     + "resnet with the extra eye_in_hand input"
                 )
-            for param in self.resnet18_embeddings.parameters():
+            for param in self.resnet18_base.parameters():
                 param.requires_grad = False
 
         ### 2. project the encoded input to a latent space
