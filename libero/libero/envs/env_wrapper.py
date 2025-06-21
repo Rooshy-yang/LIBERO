@@ -2,7 +2,6 @@ import os
 import numpy as np
 import robosuite as suite
 import matplotlib.cm as cm
-
 from robosuite.utils.errors import RandomizationError
 
 import libero.libero.envs.bddl_utils as BDDLUtils
@@ -339,3 +338,4 @@ class OffScreenRenderEnvToDmEnvWrapper(dm_env.Environment):
 
     def seed(self, seed):
         return self.env.seed(seed)
+
