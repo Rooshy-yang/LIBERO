@@ -10,6 +10,7 @@ experiments/
 experiments_saved/
 clip/
 gpt/
+build/
 bert/
 logs/
 

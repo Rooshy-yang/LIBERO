@@ -44,9 +44,9 @@ def get_libero_path(query_key):
         if not os.path.exists(config[key]):
             print(f"[Warning]: {key} path {config[key]} does not exist!")
 
-    assert (
-        query_key in config
-    ), f"Key {query_key} not found in config file {config_file}. You need to modify it. Available keys are: {config.keys()}"
+    assert query_key in config, (
+        f"Key {query_key} not found in config file {config_file}. You need to modify it. Available keys are: {config.keys()}"
+    )
     return config[query_key]
 
 
